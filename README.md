@@ -3,4 +3,5 @@
 
 ### 目录
 
-* [基于fabric的加密货币](https://github.com/hongker/blockchain-sample/tree/master/coin)
+* [加密货币](https://github.com/hongker/blockchain-sample/tree/master/coin)
+* [智能拍卖](https://github.com/hongker/blockchain-sample/tree/master/auction)
