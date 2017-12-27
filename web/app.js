@@ -51,12 +51,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: false
 }));
+
+var secret = 'thisismysecret';
 // set secret variable
-app.set('secret', 'thisismysecret');
+app.set('secret', secret);
 app.use(expressJWT({
-	secret: 'thisismysecret'
+	secret: secret
 }).unless({
-	path: ['/users']
+	path: ['/register','/login']
 }));
 app.use(bearerToken());
 app.use(function(req, res, next) {
@@ -106,10 +108,10 @@ function getErrorMessage(field) {
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Register and enroll user
-app.post('/users', function(req, res) {
+app.post('/register', function(req, res) {
 	var username = req.body.username;
 	var orgName = req.body.orgName;
-	logger.debug('End point : /users');
+	logger.debug('End point : /register');
 	logger.debug('User name : ' + username);
 	logger.debug('Org name  : ' + orgName);
 	if (!username) {
@@ -137,6 +139,51 @@ app.post('/users', function(req, res) {
 		}
 	});
 });
+
+// Login Request
+app.post('/login', function(req, res)) {
+	var username = req.body.username;
+	var password = req.body.password;
+
+	logger.debug('End point : /login');
+	logger.debug('User name : ' + username);
+
+	if (!username) {
+		res.json(getErrorMessage('\'username\''));
+		return;
+	}
+	if (!password) {
+		res.json(getErrorMessage('\'password\''));
+		return;
+	}
+
+	// 验证password
+	if(password != 'password') {
+		res.json({
+				success: false,
+				message: "Invalid Password"
+			});
+		return;
+	}
+	var token = jwt.sign({
+		exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
+		username: username,
+		password: password
+	}, app.get('secret'));
+	helper.getRegisteredUsers(username, orgName, true).then(function(response) {
+		if (response && typeof response !== 'string') {
+			response.token = token;
+			res.json(response);
+		} else {
+			res.json({
+				success: false,
+				message: response
+			});
+		}
+	});
+	
+});
+
 // Create Channel
 app.post('/channels', function(req, res) {
 	logger.info('<<<<<<<<<<<<<<<<< C R E A T E  C H A N N E L >>>>>>>>>>>>>>>>>');

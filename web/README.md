@@ -7,9 +7,9 @@
 ### 2.通过CURL进行交互数据
 - 注册
 
-* Register and enroll new users in Organization - **Org1**:
+* Register user in Organization - **Org1**:
 
-`curl -s -X POST http://localhost:4000/users -H "content-type: application/x-www-form-urlencoded" -d 'username=Jim&orgName=org1'`
+`curl -s -X POST http://localhost:4000/register -H "content-type: application/x-www-form-urlencoded" -d 'username=Jim&orgName=org1'`
 
 **OUTPUT:**
 
