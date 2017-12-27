@@ -58,11 +58,11 @@ app.set('secret', secret);
 app.use(expressJWT({
 	secret: secret
 }).unless({
-	path: ['/register','/login']
+	path: ['/register','/enroll']
 }));
 app.use(bearerToken());
 app.use(function(req, res, next) {
-	if (req.originalUrl.indexOf('/users') >= 0) {
+	if (req.originalUrl.indexOf('/register') >= 0 || req.originalUrl.indexOf('/enroll') >= 0 ) {
 		return next();
 	}
 
@@ -110,24 +110,31 @@ function getErrorMessage(field) {
 // Register and enroll user
 app.post('/register', function(req, res) {
 	var username = req.body.username;
+	var password = req.body.password;
 	var orgName = req.body.orgName;
 	logger.debug('End point : /register');
 	logger.debug('User name : ' + username);
+	logger.debug('User pass : ' + password);
 	logger.debug('Org name  : ' + orgName);
 	if (!username) {
 		res.json(getErrorMessage('\'username\''));
+		return;
+	}
+	if (!password) {
+		res.json(getErrorMessage('\'password\''));
 		return;
 	}
 	if (!orgName) {
 		res.json(getErrorMessage('\'orgName\''));
 		return;
 	}
+
 	var token = jwt.sign({
 		exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
 		username: username,
 		orgName: orgName
 	}, app.get('secret'));
-	helper.getRegisteredUsers(username, orgName, true).then(function(response) {
+	helper.getRegisteredUsers(username, password, orgName, true).then(function(response) {
 		if (response && typeof response !== 'string') {
 			response.token = token;
 			res.json(response);
@@ -140,13 +147,11 @@ app.post('/register', function(req, res) {
 	});
 });
 
-// Login Request
-app.post('/login', function(req, res)) {
+// Enroll user
+app.post('/enroll', function(req, res) {
 	var username = req.body.username;
 	var password = req.body.password;
-
-	logger.debug('End point : /login');
-	logger.debug('User name : ' + username);
+	var orgName = req.body.orgName;
 
 	if (!username) {
 		res.json(getErrorMessage('\'username\''));
@@ -156,21 +161,20 @@ app.post('/login', function(req, res)) {
 		res.json(getErrorMessage('\'password\''));
 		return;
 	}
-
-	// 验证password
-	if(password != 'password') {
-		res.json({
-				success: false,
-				message: "Invalid Password"
-			});
+	if (!orgName) {
+		res.json(getErrorMessage('\'orgName\''));
 		return;
 	}
+
+
+
 	var token = jwt.sign({
 		exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
 		username: username,
-		password: password
+		orgName: orgName
 	}, app.get('secret'));
-	helper.getRegisteredUsers(username, orgName, true).then(function(response) {
+
+	helper.getEnrollUser(username, password, orgName, true).then(function(response) {
 		if (response && typeof response !== 'string') {
 			response.token = token;
 			res.json(response);
@@ -181,7 +185,6 @@ app.post('/login', function(req, res)) {
 			});
 		}
 	});
-	
 });
 
 // Create Channel

@@ -198,7 +198,57 @@ var getAdminUser = function(userOrg) {
 	});
 };
 
-var getRegisteredUsers = function(username, userOrg, isJson) {
+var getEnrollUser = function(username, password, userOrg, isJson) {
+	var member;
+	var client = getClientForOrg(userOrg);
+
+	return hfc.newDefaultKeyValueStore({
+		path: getKeyStoreForOrg(getOrgName(userOrg))
+	}).then((store) => {
+		client.setStateStore(store);
+		client._userContext = null;
+
+		return client.getUserContext(username, true).then((user) => {
+			if(user && user.isEnrolled()) {
+				
+				logger.info('Successfully loaded member from persistence');
+				return user;
+			}else {
+				let caClient = caClients[userOrg];
+				return caClient.enroll({
+					enrollmentID: username,
+					enrollmentSecret: password
+				}).then((enrollment) => {
+					logger.debug(username + ' enrolled successfully');
+
+					member = new User(username);
+					member._enrollmentSecret = password;
+					return member.setEnrollment(enrollment.key, enrollment.certificate, getMspID(userOrg));
+				}).then(() => {
+					client.setUserContext(member);
+					return member;
+				});
+			}
+		});
+	}).then((user) => {
+		if (isJson && isJson === true) {
+			var response = {
+				success: true,
+				message: username + ' enrolled Successfully',
+			};
+			return response;
+		}
+		return user;
+	}).catch((err) => {
+		logger.error('Failed to enroll and persist user. Error: ' + err.stack ? err.stack : err);
+
+		return '' + err;
+	});
+
+
+};
+
+var getRegisteredUsers = function(username, password, userOrg, isJson) {
 	var member;
 	var client = getClientForOrg(userOrg);
 	var enrollmentSecret = null;
@@ -218,6 +268,7 @@ var getRegisteredUsers = function(username, userOrg, isJson) {
 					member = adminUserObj;
 					return caClient.register({
 						enrollmentID: username,
+						enrollmentSecret: password,
 						affiliation: userOrg + '.department1'
 					}, member);
 				}).then((secret) => {
@@ -248,7 +299,7 @@ var getRegisteredUsers = function(username, userOrg, isJson) {
 				}, (err) => {
 					logger.error(util.format('%s enroll failed: %s', username, err.stack ? err.stack : err));
 					return '' + err;
-				});;
+				});
 			}
 		});
 	}).then((user) => {
@@ -316,4 +367,5 @@ exports.ORGS = ORGS;
 exports.newPeers = newPeers;
 exports.newEventHubs = newEventHubs;
 exports.getRegisteredUsers = getRegisteredUsers;
+exports.getEnrollUser = getEnrollUser;
 exports.getOrgAdmin = getOrgAdmin;
