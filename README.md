@@ -1,8 +1,13 @@
 # blockchain-sample
-区块链应用示例
+There are some sample for blockchain.
 
 ### 目录
 
-* [加密货币](https://github.com/hongker/blockchain-sample/tree/master/coin)
-* [智能拍卖](https://github.com/hongker/blockchain-sample/tree/master/auction)
-* [web应用](https://github.com/hongker/blockchain-sample/tree/master/web)
+* [Coin](https://github.com/hongker/blockchain-sample/tree/master/coin)
+* [Auction](https://github.com/hongker/blockchain-sample/tree/master/auction)
+* [Web](https://github.com/hongker/blockchain-sample/tree/master/web)
+
+
+## Donate
+- Bitcoin:
+![1K6e6wyuJLC9V2vszsL22X92xeBFeiqGpE]http://ouecw69lw.bkt.clouddn.com/bitcoin.png
