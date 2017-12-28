@@ -166,8 +166,6 @@ app.post('/enroll', function(req, res) {
 		return;
 	}
 
-
-
 	var token = jwt.sign({
 		exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
 		username: username,

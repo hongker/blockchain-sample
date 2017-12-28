@@ -1,11 +1,11 @@
-## 区块链web
+## sample web project based on blockchain(hyperledger fabric)
 
 
-### 1.启动服务
+### 1.Start Service
 `./runApp.sh`
 
-### 2.通过CURL进行交互数据
-- 注册
+### 2.Send Request 
+- Register
 
 * Register user in Organization - **Org1**:
 
@@ -22,7 +22,7 @@
 }
 ```
 
-- 登录
+- Enroll
 
 * Enroll user in Organization - **Org1**:
 
@@ -37,3 +37,26 @@
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI"
 }
 ```
+
+- Create Channel
+
+```
+curl -s -X POST \
+  http://localhost:4000/channels \
+  -H "authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTQ4NjU1OTEsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Im9yZzEiLCJpYXQiOjE0OTQ4NjE5OTF9.yWaJhFDuTvMQRaZIqg20Is5t-JJ_1BP58yrNLOKxtNI" 
+  -H "content-type: application/json" 
+  -d '{
+	"channelName":"mychannel",
+	"channelConfigPath":"../fixtures/channel/mychannel.tx"
+}'
+```
+
+**OUTPUT:**
+```
+{
+    "success":true,
+    "message":"Channel 'mychannel' created Successfully"
+}
+```
+
+

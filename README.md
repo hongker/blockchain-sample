@@ -1,5 +1,5 @@
 # blockchain-sample
-There are some sample for blockchain.
+There are some samples of blockchain.
 
 ### 目录
 
@@ -12,4 +12,4 @@ There are some sample for blockchain.
 - Bitcoin:   
 
 ![1K6e6wyuJLC9V2vszsL22X92xeBFeiqGpE](http://ouecw69lw.bkt.clouddn.com/bitcoin.png)   
-Address: 1K6e6wyuJLC9V2vszsL22X92xeBFeiqGpE
+1K6e6wyuJLC9V2vszsL22X92xeBFeiqGpE
