@@ -9,5 +9,7 @@ There are some sample for blockchain.
 
 
 ## Donate
-- Bitcoin:
-![1K6e6wyuJLC9V2vszsL22X92xeBFeiqGpE](http://ouecw69lw.bkt.clouddn.com/bitcoin.png)
+- Bitcoin:   
+
+![1K6e6wyuJLC9V2vszsL22X92xeBFeiqGpE](http://ouecw69lw.bkt.clouddn.com/bitcoin.png)   
+Address: 1K6e6wyuJLC9V2vszsL22X92xeBFeiqGpE
