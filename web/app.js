@@ -51,18 +51,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: false
 }));
-
-var secret = 'thisismysecret';
 // set secret variable
-app.set('secret', secret);
+app.set('secret', 'thisismysecret');
 app.use(expressJWT({
-	secret: secret
+	secret: 'thisismysecret'
 }).unless({
-	path: ['/register','/enroll']
+	path: ['/users']
 }));
 app.use(bearerToken());
 app.use(function(req, res, next) {
-	if (req.originalUrl.indexOf('/register') >= 0 || req.originalUrl.indexOf('/enroll') >= 0 ) {
+	if (req.originalUrl.indexOf('/users') >= 0) {
 		return next();
 	}
 
@@ -81,7 +79,6 @@ app.use(function(req, res, next) {
 			// for the downstream code to use
 			req.username = decoded.username;
 			req.orgname = decoded.orgName;
-			req.password = decoded.password;
 			logger.debug(util.format('Decoded from JWT token: username - %s, orgname - %s', decoded.username, decoded.orgName));
 			return next();
 		}
@@ -109,33 +106,26 @@ function getErrorMessage(field) {
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Register and enroll user
-app.post('/register', function(req, res) {
+app.post('/users', function(req, res) {
 	var username = req.body.username;
-	var password = req.body.password;
 	var orgName = req.body.orgName;
-	logger.debug('End point : /register');
+	logger.debug('End point : /users');
 	logger.debug('User name : ' + username);
-	logger.debug('User pass : ' + password);
 	logger.debug('Org name  : ' + orgName);
 	if (!username) {
 		res.json(getErrorMessage('\'username\''));
 		return;
 	}
-	if (!password) {
-		res.json(getErrorMessage('\'password\''));
-		return;
-	}
 	if (!orgName) {
 		res.json(getErrorMessage('\'orgName\''));
 		return;
 	}
-
 	var token = jwt.sign({
 		exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
 		username: username,
 		orgName: orgName
 	}, app.get('secret'));
-	helper.getRegisteredUsers(username, password, orgName, true).then(function(response) {
+	helper.getRegisteredUsers(username, orgName, true).then(function(response) {
 		if (response && typeof response !== 'string') {
 			response.token = token;
 			res.json(response);
@@ -147,45 +137,6 @@ app.post('/register', function(req, res) {
 		}
 	});
 });
-
-// Enroll user
-app.post('/enroll', function(req, res) {
-	var username = req.body.username;
-	var password = req.body.password;
-	var orgName = req.body.orgName;
-
-	if (!username) {
-		res.json(getErrorMessage('\'username\''));
-		return;
-	}
-	if (!password) {
-		res.json(getErrorMessage('\'password\''));
-		return;
-	}
-	if (!orgName) {
-		res.json(getErrorMessage('\'orgName\''));
-		return;
-	}
-
-	var token = jwt.sign({
-		exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
-		username: username,
-		orgName: orgName
-	}, app.get('secret'));
-
-	helper.getEnrollUser(username, password, orgName, true).then(function(response) {
-		if (response && typeof response !== 'string') {
-			response.token = token;
-			res.json(response);
-		} else {
-			res.json({
-				success: false,
-				message: response
-			});
-		}
-	});
-});
-
 // Create Channel
 app.post('/channels', function(req, res) {
 	logger.info('<<<<<<<<<<<<<<<<< C R E A T E  C H A N N E L >>>>>>>>>>>>>>>>>');
@@ -193,7 +144,7 @@ app.post('/channels', function(req, res) {
 	var channelName = req.body.channelName;
 	var channelConfigPath = req.body.channelConfigPath;
 	logger.debug('Channel name : ' + channelName);
-	logger.debug('channelConfigPath : ' + channelConfigPath); //../fixtures/channel/mychannel.tx
+	logger.debug('channelConfigPath : ' + channelConfigPath); //../artifacts/channel/mychannel.tx
 	if (!channelName) {
 		res.json(getErrorMessage('\'channelName\''));
 		return;
@@ -325,7 +276,7 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName', function(req, res) 
 		return;
 	}
 
-	invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.password, req.orgname)
+	invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});

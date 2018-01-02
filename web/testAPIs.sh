@@ -16,9 +16,9 @@ starttime=$(date +%s)
 echo "POST request Enroll on Org1  ..."
 echo
 ORG1_TOKEN=$(curl -s -X POST \
-  http://localhost:4000/register \
+  http://localhost:4000/users \
   -H "content-type: application/x-www-form-urlencoded" \
-  -d 'username=Jim&password=123456&orgName=org1')
+  -d 'username=Jim&orgName=org1')
 echo $ORG1_TOKEN
 ORG1_TOKEN=$(echo $ORG1_TOKEN | jq ".token" | sed "s/\"//g")
 echo
@@ -27,7 +27,7 @@ echo
 echo "POST request Enroll on Org2 ..."
 echo
 ORG2_TOKEN=$(curl -s -X POST \
-  http://localhost:4000/register \
+  http://localhost:4000/users \
   -H "content-type: application/x-www-form-urlencoded" \
   -d 'username=Barry&password=123456&orgName=org2')
 echo $ORG2_TOKEN
@@ -118,7 +118,7 @@ curl -s -X POST \
 echo
 echo
 
-:<<!
+
 echo "POST invoke chaincode on peers of Org1 and Org2"
 echo
 TRX_ID=$(curl -s -X POST \
@@ -212,5 +212,3 @@ echo
 
 
 echo "Total execution time : $(($(date +%s)-starttime)) secs ..."
-
-!
