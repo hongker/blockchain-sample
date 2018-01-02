@@ -81,6 +81,7 @@ app.use(function(req, res, next) {
 			// for the downstream code to use
 			req.username = decoded.username;
 			req.orgname = decoded.orgName;
+			req.password = decoded.password;
 			logger.debug(util.format('Decoded from JWT token: username - %s, orgname - %s', decoded.username, decoded.orgName));
 			return next();
 		}
@@ -192,7 +193,7 @@ app.post('/channels', function(req, res) {
 	var channelName = req.body.channelName;
 	var channelConfigPath = req.body.channelConfigPath;
 	logger.debug('Channel name : ' + channelName);
-	logger.debug('channelConfigPath : ' + channelConfigPath); //../artifacts/channel/mychannel.tx
+	logger.debug('channelConfigPath : ' + channelConfigPath); //../fixtures/channel/mychannel.tx
 	if (!channelName) {
 		res.json(getErrorMessage('\'channelName\''));
 		return;
@@ -324,7 +325,7 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName', function(req, res) 
 		return;
 	}
 
-	invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
+	invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.password, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});
