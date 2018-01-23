@@ -20,32 +20,22 @@ type SimpleAuction struct {
 	AuctionTime int   //竞拍时间
 }
 
+// Goods 商品信息
 type Goods struct {
+	Name string `json:"name"` //商品名称
 	Price float64 `json:"price"` //价格
 	State int     `json:"state"` //状态
+	Owner string  `json:"owner"` // 拥有者
 }
 
-const WaitState = 0    //等待
-const AuctionState = 1 //拍卖ing
-const SettleState = 2  //结束
+const (
+	WaitState    = 0 //等待
+	AuctionState = 1 //拍卖ing
+	SettleState  = 2 //结束
+)
 
 // Init 初始化
 func (s *SimpleAuction) Init(stub shim.ChaincodeStubInterface) peer.Response {
-	args := stub.GetStringArgs()
-	if len(args) != 2 {
-		return shim.Error("Incorrect params!Excepting StartTime and AuctionTime")
-	}
-	var err error
-
-	s.StartTime, err = strconv.ParseInt(args[0], 10, 64)
-	if err != nil {
-		return shim.Error("StartTime should be int")
-	}
-
-	s.AuctionTime, err = strconv.Atoi(args[1])
-	if err != nil {
-		return shim.Error("AuctionTime should be int ")
-	}
 
 	return shim.Success(nil)
 
@@ -57,7 +47,9 @@ func (s *SimpleAuction) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	var result string
 	var err error
-	if fn == "set" {
+	if fn == "open" {
+		result, err = open(stub, args)
+	}else if fn == "set" {
 		result, err = set(stub, args)
 	} else if fn == "get" {
 		result, err = get(stub, args)
@@ -75,19 +67,32 @@ func (s *SimpleAuction) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	return shim.Success([]byte(result))
 }
 
+// open 开启拍卖
+func open(stub shim.ChaincodeStubInterface, args []string) (string, error){
+	
+}
+
 // set 设置拍卖商品
 func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
-	if len(args) != 2 {
-		return "", fmt.Errorf("Incorrect arguments. Expecting a goods name and a price")
+	if len(args) != 3 {
+		return "", shim.("Incorrect arguments. Expecting goods name,price,owner")
+	}
+	name := args[0]
+	goodsInfo, err := stub.GetState(name)
+	if err != nil {
+		return "", fmt.Errorf("Failed to get goods :%s", err.Error())
+	}else if goodsInfo != nil {
+		return "", fmt.Errorf("This goods already exists :%s", name)
 	}
 
 	price, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
 		return "", fmt.Errorf("Failed to convert price to float:%s", err.Error())
 	}
-
+	
 	state := WaitState
-	goods := Goods{price, state}
+	owner := args[2]
+	goods := Goods{name, price, state, owner}
 
 	goodsStr, err := json.Marshal(goods)
 	if err != nil {
