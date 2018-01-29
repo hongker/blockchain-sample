@@ -40,7 +40,7 @@ function restartNetwork() {
 	rm -rf /tmp/hfc-test-kvs_peerOrg* $HOME/.hfc-key-store/ /tmp/fabric-client-kvs_peerOrg*
 
 	#Start the network
-	docker-compose up -d
+	docker-compose up
 	cd -
 	echo
 }
@@ -61,4 +61,5 @@ restartNetwork
 
 installNodeModules
 
-PORT=4000 node app
+# PORT=4000 node app.js
+

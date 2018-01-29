@@ -55,6 +55,18 @@ for (let key in ORGS) {
 	}
 }
 
+function needValidate(url) {
+	if(url.indexOf('/users') >= 0) {
+		return false;
+	}
+
+	if(url.indexOf('/index') >= 0) {
+		return false;
+	}
+
+	return true;
+}
+
 function setupPeers(channel, org, client) {
 	for (let key in ORGS[org].peers) {
 		let data = fs.readFileSync(path.join(__dirname, ORGS[org].peers[key]['tls_cacerts']));
@@ -317,3 +329,4 @@ exports.newPeers = newPeers;
 exports.newEventHubs = newEventHubs;
 exports.getRegisteredUsers = getRegisteredUsers;
 exports.getOrgAdmin = getOrgAdmin;
+exports.needValidate = needValidate;

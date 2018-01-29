@@ -56,11 +56,11 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
 	secret: 'thisismysecret'
 }).unless({
-	path: ['/users']
+	path: ['/users','/index']
 }));
 app.use(bearerToken());
 app.use(function(req, res, next) {
-	if (req.originalUrl.indexOf('/users') >= 0) {
+	if (helper.needValidate(req.originalUrl) == false) {
 		return next();
 	}
 
@@ -101,6 +101,10 @@ function getErrorMessage(field) {
 	};
 	return response;
 }
+
+app.get('/index', function (req, res) {
+  res.send('Hello World!');
+});
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
@@ -156,7 +160,10 @@ app.post('/channels', function(req, res) {
 
 	channels.createChannel(channelName, channelConfigPath, req.username, req.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json({
+			success: true,
+			message: message,
+		});
 	});
 });
 // Join Channel
@@ -177,7 +184,10 @@ app.post('/channels/:channelName/peers', function(req, res) {
 
 	join.joinChannel(channelName, peers, req.username, req.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json({
+			success: true,
+			message: message,
+		});
 	});
 });
 // Install chaincode on target peers
@@ -210,7 +220,10 @@ app.post('/chaincodes', function(req, res) {
 
 	install.installChaincode(peers, chaincodeName, chaincodePath, chaincodeVersion, req.username, req.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json({
+			success: true,
+			message: message,
+		});
 	});
 });
 // Instantiate chaincode on target peers
@@ -244,7 +257,10 @@ app.post('/channels/:channelName/chaincodes', function(req, res) {
 	}
 	instantiate.instantiateChaincode(channelName, chaincodeName, chaincodeVersion, fcn, args, req.username, req.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json({
+			success: true,
+			message: message,
+		});
 	});
 });
 // Invoke transaction on chaincode on target peers
@@ -317,7 +333,16 @@ app.get('/channels/:channelName/chaincodes/:chaincodeName', function(req, res) {
 
 	query.queryChaincode(peer, channelName, chaincodeName, args, fcn, req.username, req.orgname)
 	.then(function(message) {
-		res.send(message);
+		if (message instanceof Array) {
+			res.json({
+				success: true,
+				data: message,
+			});
+		}else {
+			res.send(message);
+		}
+
+		
 	});
 });
 //  Query Get Block by BlockNumber

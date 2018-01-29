@@ -42,8 +42,13 @@ var queryChaincode = function(peer, channelName, chaincodeName, args, fcn, usern
 		return 'Failed to get submitter \''+username+'\'. Error: ' + err.stack ? err.stack :
 			err;
 	}).then((response_payloads) => {
+		
 		if (response_payloads) {
 			for (let i = 0; i < response_payloads.length; i++) {
+				return {
+					name: args[0],
+					amount: response_payloads[i].toString('utf8'),
+				};
 				logger.info(args[0]+' now has ' + response_payloads[i].toString('utf8') +
 					' after the move');
 				return args[0]+' now has ' + response_payloads[i].toString('utf8') +
@@ -200,16 +205,14 @@ var getInstalledChaincodes = function(peer, type, username, org) {
 			} else {
 				logger.debug('<<< Instantiated Chaincodes >>>');
 			}
-			var details = [];
+			var res = [];
 			for (let i = 0; i < response.chaincodes.length; i++) {
 				logger.debug('name: ' + response.chaincodes[i].name + ', version: ' +
 					response.chaincodes[i].version + ', path: ' + response.chaincodes[i].path
 				);
-				details.push('name: ' + response.chaincodes[i].name + ', version: ' +
-					response.chaincodes[i].version + ', path: ' + response.chaincodes[i].path
-				);
+				res.push(response.chaincodes[i].name);
 			}
-			return details;
+			return res;
 		} else {
 			logger.error('response is null');
 			return 'response is null';
@@ -240,10 +243,10 @@ var getChannels = function(peer, username, org) {
 			logger.debug('<<< channels >>>');
 			var channelNames = [];
 			for (let i = 0; i < response.channels.length; i++) {
-				channelNames.push('channel id: ' + response.channels[i].channel_id);
+				channelNames.push(response.channels[i].channel_id);
 			}
 			logger.debug(channelNames);
-			return response;
+			return channelNames;
 		} else {
 			logger.error('response_payloads is null');
 			return 'response_payloads is null';

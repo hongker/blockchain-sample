@@ -1,2 +1,4 @@
 /web/node_modules/*
 /web/package-lock.json
+/client/node_modules/*
+/client/package-lock.json
