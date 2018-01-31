@@ -5,13 +5,16 @@ import App from './App.vue'
 import Login from './views/Login.vue'
 import Admin from './views/Admin.vue'
 import Manage from './views/Manage.vue'
+import Init from './views/Init.vue'
+import Register from './views/Register.vue'
 import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 Vue.use(ElementUI)
 
 const routes = [
-	{path: '/', redirect: Login},  
+	{path: '/init', component: Init},  
+	{path: '/register', component: Register},  
   { path: '/login', component: Login },
   { path: '/admin', component: Admin },
   { path: '/manage', component: Manage },

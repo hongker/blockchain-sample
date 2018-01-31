@@ -24,7 +24,9 @@ instance.interceptors.request.use(function (config) {
     return Promise.reject(error);
   });
 
-export const requestLogin = params => { return instance.post(`/users`, params).then(res => res.data); };
+export const requestRegister = params => { return instance.post(`/register`, params).then(res => res.data); };
+
+export const requestLogin = params => { return instance.post(`/login`, params).then(res => res.data); };
 
 export const createChannel = params => { return instance.post(`/channels`, params).then(res => res.data); };
 

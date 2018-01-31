@@ -56,7 +56,7 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
 	secret: 'thisismysecret'
 }).unless({
-	path: ['/users','/index']
+	path: ['/register','/index', '/login']
 }));
 app.use(bearerToken());
 app.use(function(req, res, next) {
@@ -109,11 +109,13 @@ app.get('/index', function (req, res) {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+
 // Register and enroll user
-app.post('/users', function(req, res) {
+app.post('/register', function(req, res) {
 	var username = req.body.username;
 	var orgName = req.body.orgName;
-	logger.debug('End point : /users');
+	var password = req.body.password;
+	logger.debug('End point : /register');
 	logger.debug('User name : ' + username);
 	logger.debug('Org name  : ' + orgName);
 	if (!username) {
@@ -129,7 +131,41 @@ app.post('/users', function(req, res) {
 		username: username,
 		orgName: orgName
 	}, app.get('secret'));
-	helper.getRegisteredUsers(username, orgName, true).then(function(response) {
+	helper.getRegisteredUsers(username, orgName, password, true).then(function(response) {
+		if (response && typeof response !== 'string') {
+			response.token = token;
+			res.json(response);
+		} else {
+			res.json({
+				success: false,
+				message: response
+			});
+		}
+	});
+});
+// Enroll user
+app.post('/login', function(req, res) {
+	var username = req.body.username;
+	var password = req.body.password;
+	var orgName = req.body.orgName;
+
+	logger.debug('End point : /login');
+	logger.debug('User name : ' + username);
+	logger.debug('Org name  : ' + orgName);
+	if (!username) {
+		res.json(getErrorMessage('\'username\''));
+		return;
+	}
+	if (!orgName) {
+		res.json(getErrorMessage('\'orgName\''));
+		return;
+	}
+	var token = jwt.sign({
+		exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
+		username: username,
+		orgName: orgName
+	}, app.get('secret'));
+	helper.getRegisteredUsers(username, orgName, password, true).then(function(response) {
 		if (response && typeof response !== 'string') {
 			response.token = token;
 			res.json(response);

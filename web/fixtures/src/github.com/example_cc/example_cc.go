@@ -16,7 +16,6 @@ limitations under the License.
 
 package main
 
-
 import (
 	"fmt"
 	"strconv"
@@ -31,40 +30,9 @@ var logger = shim.NewLogger("example_cc0")
 type SimpleChaincode struct {
 }
 
-func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response  {
-	logger.Info("########### example_cc0 Init ###########")
-
-	_, args := stub.GetFunctionAndParameters()
-	var A, B string    // Entities
-	var Aval, Bval int // Asset holdings
-	var err error
-
-	// Initialize the chaincode
-	A = args[0]
-	Aval, err = strconv.Atoi(args[1])
-	if err != nil {
-		return shim.Error("Expecting integer value for asset holding")
-	}
-	B = args[2]
-	Bval, err = strconv.Atoi(args[3])
-	if err != nil {
-		return shim.Error("Expecting integer value for asset holding")
-	}
-	logger.Info("Aval = %d, Bval = %d\n", Aval, Bval)
-
-	// Write the state to the ledger
-	err = stub.PutState(A, []byte(strconv.Itoa(Aval)))
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-
-	err = stub.PutState(B, []byte(strconv.Itoa(Bval)))
-	if err != nil {
-		return shim.Error(err.Error())
-	}
+func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 
 	return shim.Success(nil)
-
 
 }
 
@@ -73,10 +41,14 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	logger.Info("########### example_cc0 Invoke ###########")
 
 	function, args := stub.GetFunctionAndParameters()
-	
+
 	if function == "delete" {
 		// Deletes an entity from its state
 		return t.delete(stub, args)
+	}
+
+	if function == "initialize" {
+		return t.initialize(stub, args)
 	}
 
 	if function == "query" {
@@ -146,7 +118,7 @@ func (t *SimpleChaincode) move(stub shim.ChaincodeStubInterface, args []string) 
 		return shim.Error(err.Error())
 	}
 
-        return shim.Success(nil);
+	return shim.Success(nil)
 }
 
 // Deletes an entity from state
@@ -161,6 +133,28 @@ func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string
 	err := stub.DelState(A)
 	if err != nil {
 		return shim.Error("Failed to delete state")
+	}
+
+	return shim.Success(nil)
+}
+
+// Query callback representing the query of a chaincode
+func (t *SimpleChaincode) initialize(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting name of the person and init amount")
+	}
+
+	name := args[0]
+	val, err := strconv.Atoi(args[1])
+	if err != nil {
+		return shim.Error("Expecting integer value for asset holding")
+	}
+
+	// Write the state to the ledger
+	err = stub.PutState(name, []byte(strconv.Itoa(val)))
+	if err != nil {
+		return shim.Error(err.Error())
 	}
 
 	return shim.Success(nil)

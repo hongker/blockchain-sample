@@ -56,11 +56,15 @@ for (let key in ORGS) {
 }
 
 function needValidate(url) {
-	if(url.indexOf('/users') >= 0) {
+	if(url.indexOf('/register') >= 0) {
 		return false;
 	}
 
 	if(url.indexOf('/index') >= 0) {
+		return false;
+	}
+
+	if(url.indexOf('/login') >= 0) {
 		return false;
 	}
 
@@ -210,7 +214,60 @@ var getAdminUser = function(userOrg) {
 	});
 };
 
-var getRegisteredUsers = function(username, userOrg, isJson) {
+var getEnrolledUsers = function(username, userOrg, password, isJson) {
+	var member;
+	var client = getClientForOrg(userOrg);return hfc.newDefaultKeyValueStore({
+		path: getKeyStoreForOrg(getOrgName(userOrg))
+	}).then((store) => {
+		client.setStateStore(store);
+		// clearing the user context before switching
+		client._userContext = null;
+		return client.getUserContext(username, true).then((user) => {
+			if (user && user.isEnrolled()) {
+				logger.info('Successfully loaded member from persistence');
+				return user;
+			} else {
+				let caClient = caClients[userOrg];
+				return caClient.enroll({
+						enrollmentID: username,
+						enrollmentSecret: secret
+					}).then((message) => {
+					if (message && typeof message === 'string' && message.includes(
+							'Error:')) {
+						logger.error(username + ' enrollment failed');
+						return message;
+					}
+					logger.debug(username + ' enrolled successfully');
+
+					member = new User(username);
+					member._enrollmentSecret = enrollmentSecret;
+					return member.setEnrollment(message.key, message.certificate, getMspID(userOrg));
+				}).then(() => {
+					client.setUserContext(member);
+					return member;
+				}, (err) => {
+					logger.error(util.format('%s enroll failed: %s', username, err.stack ? err.stack : err));
+					return '' + err;
+				});;
+			}
+		});
+	}).then((user) => {
+		if (isJson && isJson === true) {
+			var response = {
+				success: true,
+				secret: user._enrollmentSecret,
+				message: username + ' enrolled Successfully',
+			};
+			return response;
+		}
+		return user;
+	}, (err) => {
+		logger.error(util.format('Failed to get registered user: %s, error: %s', username, err.stack ? err.stack : err));
+		return '' + err;
+	});
+};
+
+var getRegisteredUsers = function(username, userOrg, password, isJson) {
 	var member;
 	var client = getClientForOrg(userOrg);
 	var enrollmentSecret = null;
@@ -230,7 +287,8 @@ var getRegisteredUsers = function(username, userOrg, isJson) {
 					member = adminUserObj;
 					return caClient.register({
 						enrollmentID: username,
-						affiliation: userOrg + '.department1'
+						affiliation: userOrg + '.department1',
+						enrollmentSecret: password,
 					}, member);
 				}).then((secret) => {
 					enrollmentSecret = secret;
