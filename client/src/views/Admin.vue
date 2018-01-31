@@ -30,7 +30,7 @@
     <el-table-column
       prop="desc"
       label="介绍"
-      width="280">
+      >
     </el-table-column>
     <el-table-column
       prop="date"
@@ -74,8 +74,12 @@
 
          tableData: [{
            date: '2016-05-02',
+           name: '数字货币',
+           desc: '基于区块链的数字货币，包含查询、转账功能'
+         },{
+           date: '2016-05-03',
            name: '智能拍卖',
-           desc: '基于区块链的智能拍卖'
+           desc: '基于区块链的线上拍卖，包含上架商品、出价、付款功能'
          }],
        };
      },
