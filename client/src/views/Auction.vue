@@ -7,26 +7,26 @@
   background-color="#545c64"
   text-color="#fff"
   active-text-color="#ffd04b">
-  <el-menu-item index="1">处理中心</el-menu-item>
+  <el-menu-item index="1">竞拍列表</el-menu-item>
   <el-submenu index="2">
-    <template slot="title">我的工作台</template>
-    <el-menu-item index="2-1">选项1</el-menu-item>
-    <el-menu-item index="2-2">选项2</el-menu-item>
-    <el-menu-item index="2-3">选项3</el-menu-item>
+    <template slot="title">我的主页</template>
+    <el-menu-item index="2-1">已参与竞拍</el-menu-item>
+    <el-menu-item index="2-2">已拍下商品</el-menu-item>
+    <el-menu-item index="2-3">已售出商品</el-menu-item>
   </el-submenu>
   <el-menu-item index="3"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>
 </el-menu>
 	<section class="container">
 		<el-row>
-  <el-col :span="4" v-for="(o, index) in 2" :key="o" :offset="index > 0 ? 2 : 0">
+  <el-col :span="4" v-for="(item, index) in goods" :key="index" :offset="index > 0 ? 2 : 0">
     <el-card :body-style="{ padding: '0px' }">
-      <img src="http://element-cn.eleme.io/static/hamburger.50e4091.png" class="image">
+      <img v-bind:src="item.picture" class="image">
       <div style="padding: 14px;">
-        <span>好吃的汉堡</span>
-        <span class="price"><strong class="red">200</strong></span>
+        <span>{{item.title}}</span>
+        <span class="price"><strong class="red">{{item.price}}</strong></span>
         <div class="bottom clearfix">
-          <time class="time">{{ currentDate }}</time>
-          <el-button type="danger" class="button" size="medium">出价</el-button>
+          <time class="time">{{ item.date }}</time>
+          <el-button type="danger" class="button" size="medium" @click="auction(index)">出价</el-button>
         </div>
       </div>
     </el-card>
@@ -42,8 +42,50 @@
 			return {
 				activeIndex2: '1',
 				currentDate: '02-08 14:50:00',
+				goods: [
+					{
+						id: 1,
+						picture: "http://element-cn.eleme.io/static/hamburger.50e4091.png",
+						title: "好吃的汉堡",
+						date:"02-08 14:50:00",
+						price: 200.00,
+					},
+					{
+						id: 2,
+						picture: "http://element-cn.eleme.io/static/hamburger.50e4091.png",
+						title: "好吃的汉堡",
+						date:"02-08 14:50:00",
+						price: 200.00,
+					}
+				],
 			}
 		},
+		methods: {
+      auction(index) {
+        this.$prompt('请输入你的价格', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+        }).then(({ value }) => {
+        	let oldPrice = this.goods[index].price;
+        	if(value <= oldPrice) {
+        		this.$message({
+		            type: 'error',
+		            message: '不能低于当前价:'+oldPrice
+		          }); 
+        		return;
+        	}
+          this.$message({
+            type: 'success',
+            message: '你的出价是: ' + value
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '取消输入'
+          });       
+        });
+      }
+    }
 	}
 </script>
 <style>
