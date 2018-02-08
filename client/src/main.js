@@ -7,6 +7,7 @@ import Admin from './views/Admin.vue'
 import Manage from './views/Manage.vue'
 import Init from './views/Init.vue'
 import Register from './views/Register.vue'
+import Auction from './views/Auction.vue'
 import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
@@ -18,6 +19,7 @@ const routes = [
   { path: '/login', component: Login },
   { path: '/admin', component: Admin },
   { path: '/manage', component: Manage },
+  {path: '/auction', component: Auction},  
 ]
 
 const router = new VueRouter({

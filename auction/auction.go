@@ -12,6 +12,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
 	"strconv"
+	"time"
 )
 
 // SimpleAuction 拍卖会
@@ -130,6 +131,35 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	return fmt.Sprintf("Set auction Success"), nil
 }
 
+// getConfig 获取配置文件
+func getConfig(stub shim.ChaincodeStubInterface) (Config, error) {
+	configStr, err := stub.GetState("config")
+	config := Config{}
+
+	if err != nil {
+		return config, fmt.Errorf("Failed to get auction config")
+	}
+
+	json.Unmarshal(configStr, &config)
+
+	return config, nil
+}
+
+// checkAuctionStart 检查拍卖是否开启
+func checkAuctionStart(startTime string, auctionTime int) bool {
+	now := time.Now().Unix()
+	timeLayout := "2006-01-02 15:04:05"
+	theTime, _ := time.Parse(timeLayout, startTime)
+
+	startTimeUnix := theTime.Unix()
+
+	if now >= startTimeUnix && now < startTimeUnix+int64(auctionTime) {
+		return true
+	}
+
+	return false
+}
+
 // get 获取竞拍商品信息
 func get(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	if len(args) != 1 {
@@ -138,7 +168,9 @@ func get(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 
 	value, err := stub.GetState(args[0])
 	if err != nil {
-		return "", fmt.Errorf("Failed to get goods price:%s, with error:%s", args[0], err.Error())
+		return "", fmt.Errorf("Failed to get goods:%s", err.Error())
+	} else if value == nil {
+		return "", fmt.Errorf("This goods: %s, not exists", args[0])
 	}
 
 	return string(value), nil
@@ -146,6 +178,15 @@ func get(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 
 // start 开始
 func start(stub shim.ChaincodeStubInterface, args []string) (string, error) {
+	config, err := getConfig(stub)
+	if err != nil {
+		return "", err
+	}
+
+	if checkAuctionStart(config.StartTime, config.AuctionTime) == false {
+		return "", fmt.Errorf("The auction isn't on start time")
+	}
+
 	value, err := stub.GetState(args[0])
 	if err != nil {
 		return "", fmt.Errorf("Failed to get goods info:%s, with error:%s", args[0], err.Error())
