@@ -16,7 +16,6 @@ type Coin struct {
 
 // Account 账户
 type Account struct {
-	ID     int64  // 编号
 	Name   string // 用户名
 	Amount int64  // 存款,单位:分
 	Number int64  // 代币数量
@@ -32,6 +31,8 @@ func (c *Coin) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	fn, args := stub.GetFunctionAndParameters()
 	if fn == "get" {
 		return c.get(stub, args)
+	} else if fn == "set" {
+		return c.set(stub, args)
 	} else if fn == "trade" {
 		return c.trade(stub, args)
 	} else if fn == "send" {
@@ -51,7 +52,44 @@ func (c *Coin) get(stub shim.ChaincodeStubInterface, args []string) peer.Respons
 	if err != nil {
 		return shim.Error("The account is not exist")
 	}
-	return shim.Success(accountVal)
+
+	account := Account{}
+	json.Unmarshal(accountVal, &account)
+	fmt.Println(account)
+	return shim.Success(nil)
+}
+
+// set
+func (c *Coin) set(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting a name,amount,number")
+	}
+	name := args[0]
+
+	amount, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		return shim.Error("Incorrect Amount")
+	}
+
+	number, err := strconv.ParseInt(args[2], 10, 64)
+	if err != nil {
+		return shim.Error("Incorrect Number")
+	}
+
+	account := Account{
+		name, amount, number,
+	}
+
+	accountVal, err := json.Marshal(account)
+	if err != nil {
+		return shim.Error("Failed to convert account to string" + err.Error())
+	}
+
+	err = stub.PutState(name, accountVal)
+	if err != nil {
+		return shim.Error("The account Init return error:" + err.Error())
+	}
+	return shim.Success(nil)
 }
 
 // trade 交易
@@ -195,6 +233,6 @@ func (c *Coin) send(stub shim.ChaincodeStubInterface, args []string) peer.Respon
 // main 主函数
 func main() {
 	if err := shim.Start(new(Coin)); err != nil {
-		fmt.Printf("Error starting Coin chaincode: %s", err)
+		fmt.Printf("Error starting Coin: %s", err)
 	}
 }
