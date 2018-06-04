@@ -2,7 +2,7 @@
 一个基本的虚拟货币交易智能合约
 
 ### 功能说明
-  - 定价  
+  - 定价
   该合约初始化时会制定FeeCoin的交易价格
 
   - 注册
@@ -44,13 +44,13 @@
   - 使用chaincode(Terminal 3)
   ```
   docker exec -it cli bash
-  peer chaincode install -p chaincodedev/chaincode/coin -n mycc -v 0  # 保证当前目录是chaincodedev的父目录
+  peer chaincode install -p chaincodedev/chaincode/coin -n mycc -v 0            # 保证当前目录是chaincodedev的父目录
 
-  peer chaincode instantiate -n mycc -v 0 -c '{"Args":["5.00"]}' -C myc # 制定FeeCoin价格
-  peer chaincode invoke -n mycc -c '{"Args":["set", "a", "200"]}' -C myc # 注册用户
-  peer chaincode invoke -n mycc -c '{"Args":["buy", "a", "10"]}' -C myc  # 买入FeeCoin
-  peer chaincode invoke -n mycc -c '{"Args":["query", "a"]}' -C myc      # 查询账户
-  peer chaincode invoke -n mycc -c '{"Args":["sale", "a", "10"]}' -C myc # 卖出FeeCoin
-  peer chaincode invoke -n mycc -c '{"Args":["recharge", "a", "1000"]}' -C myc # 充值
-  peer chaincode invoke -n mycc -c '{"Args":["getPrice"]}' -C myc        # 查询FeeCoin当前价格
+  peer chaincode instantiate -n mycc -v 0 -c '{"Args":["5.00"]}' -C myc         # 制定FeeCoin价格
+  peer chaincode invoke -n mycc -c '{"Args":["set", "a", "200"]}' -C myc        # 注册用户
+  peer chaincode invoke -n mycc -c '{"Args":["buy", "a", "10"]}' -C myc         # 买入FeeCoin
+  peer chaincode invoke -n mycc -c '{"Args":["query", "a"]}' -C myc             # 查询账户
+  peer chaincode invoke -n mycc -c '{"Args":["sale", "a", "10"]}' -C myc        # 卖出FeeCoin
+  peer chaincode invoke -n mycc -c '{"Args":["recharge", "a", "1000"]}' -C myc  # 充值
+  peer chaincode invoke -n mycc -c '{"Args":["getPrice"]}' -C myc               # 查询FeeCoin当前价格
   ```
